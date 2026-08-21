@@ -1,0 +1,50 @@
+package com.garagehub.service;
+
+import com.garagehub.dto.UserRequestDto;
+import com.garagehub.dto.UserResponseDto;
+import com.garagehub.entity.User;
+import com.garagehub.mapper.UserMapper;
+import com.garagehub.repository.UserRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class UserService {
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
+
+    public UserService(UserRepository userRepository, UserMapper userMapper) {
+        this.userRepository = userRepository;
+        this.userMapper = userMapper;
+    }
+
+    public List<UserResponseDto> getAll() {
+        return userRepository.findAll().stream()
+                .map(userMapper::toResponseDto)
+                .toList();
+    }
+
+    public UserResponseDto getById(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        return userMapper.toResponseDto(user);
+    }
+
+    public UserResponseDto create(UserRequestDto dto) {
+        User user = userMapper.toEntity(dto);
+        User saved = userRepository.save(user);
+        return userMapper.toResponseDto(saved);
+    }
+
+    public UserResponseDto update(Long id, UserRequestDto dto) {
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        user.setFirstName(dto.getFirstName());
+        user.setLastName(dto.getLastName());
+        user.setEmail(dto.getEmail());
+        return userMapper.toResponseDto(userRepository.save(user));
+    }
+
+    public void delete(Long id) {
+        userRepository.deleteById(id);
+    }
+}
