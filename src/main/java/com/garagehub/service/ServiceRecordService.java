@@ -5,6 +5,7 @@ import com.garagehub.dto.ServiceRecordResponseDto;
 import com.garagehub.entity.ServiceRecord;
 import com.garagehub.entity.User;
 import com.garagehub.entity.Vehicle;
+import com.garagehub.exception.ResourceNotFoundException;
 import com.garagehub.mapper.ServiceRecordMapper;
 import com.garagehub.repository.ServiceRecordRepository;
 import com.garagehub.repository.UserRepository;
@@ -35,16 +36,16 @@ public class ServiceRecordService {
 
     public ServiceRecordResponseDto getById(Long id) {
         ServiceRecord serviceRecord = serviceRecordRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("ServiceRecord Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("ServiceRecord Not Found"));
         return serviceRecordMapper.toResponseDto(serviceRecord);
     }
 
     public ServiceRecordResponseDto create(ServiceRecordRequestDto dto) {
         Vehicle vehicle = vehicleRepository.findById(dto.getVehicleId())
-                .orElseThrow(() -> new RuntimeException("Vehicle Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle Not Found"));
 
         User mechanic = userRepository.findById(dto.getMechanicId())
-                .orElseThrow(() -> new RuntimeException("Mechanic Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Mechanic Not Found"));
 
         ServiceRecord serviceRecord = serviceRecordMapper.toEntity(dto, vehicle, mechanic);
         ServiceRecord saved = serviceRecordRepository.save(serviceRecord);
@@ -53,13 +54,13 @@ public class ServiceRecordService {
 
     public ServiceRecordResponseDto update(Long id, ServiceRecordRequestDto dto) {
         ServiceRecord serviceRecord = serviceRecordRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("ServiceRecord Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("ServiceRecord Not Found"));
 
         Vehicle vehicle = vehicleRepository.findById(dto.getVehicleId())
-                .orElseThrow(() -> new RuntimeException("Vehicle Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle Not Found"));
 
         User mechanic = userRepository.findById(dto.getMechanicId())
-                .orElseThrow(() -> new RuntimeException("Mechanic Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Mechanic Not Found"));
 
         serviceRecord.setCost(dto.getCost());
         serviceRecord.setNextRecommendedServiceMileage(dto.getNextRecommendedServiceMileage());

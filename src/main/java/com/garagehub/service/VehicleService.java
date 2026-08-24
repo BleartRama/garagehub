@@ -4,6 +4,7 @@ import com.garagehub.dto.VehicleRequestDto;
 import com.garagehub.dto.VehicleResponseDto;
 import com.garagehub.entity.User;
 import com.garagehub.entity.Vehicle;
+import com.garagehub.exception.ResourceNotFoundException;
 import com.garagehub.mapper.VehicleMapper;
 import com.garagehub.repository.UserRepository;
 import com.garagehub.repository.VehicleRepository;
@@ -29,12 +30,12 @@ public class VehicleService {
     }
 
     public VehicleResponseDto getById(Long id) {
-        Vehicle vehicle = vehicleRepository.findById(id).orElseThrow(() -> new RuntimeException("Vehicle Not Found"));
+        Vehicle vehicle = vehicleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Vehicle Not Found"));
         return vehicleMapper.toResponseDto(vehicle);
     }
 
     public VehicleResponseDto create(VehicleRequestDto dto) {
-         User owner = userRepository.findById(dto.getOwnerId()).orElseThrow(() -> new RuntimeException("Owner Not Found"));
+         User owner = userRepository.findById(dto.getOwnerId()).orElseThrow(() -> new ResourceNotFoundException("Owner Not Found"));
 
          Vehicle vehicle = vehicleMapper.toEntity(dto, owner);
          Vehicle saved = vehicleRepository.save(vehicle);
@@ -42,9 +43,9 @@ public class VehicleService {
     }
 
     public VehicleResponseDto update(Long id, VehicleRequestDto dto) {
-        Vehicle vehicle = vehicleRepository.findById(id).orElseThrow(() -> new RuntimeException("Vehicle Not Found"));
+        Vehicle vehicle = vehicleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Vehicle Not Found"));
 
-        User owner = userRepository.findById(dto.getOwnerId()).orElseThrow(() -> new RuntimeException("Owner Not Found"));
+        User owner = userRepository.findById(dto.getOwnerId()).orElseThrow(() -> new ResourceNotFoundException("Owner Not Found"));
 
         vehicle.setRegistrationNumber(dto.getRegistrationNumber());
         vehicle.setBrand(dto.getBrand());

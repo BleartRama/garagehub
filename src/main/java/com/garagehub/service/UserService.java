@@ -3,6 +3,7 @@ package com.garagehub.service;
 import com.garagehub.dto.UserRequestDto;
 import com.garagehub.dto.UserResponseDto;
 import com.garagehub.entity.User;
+import com.garagehub.exception.ResourceNotFoundException;
 import com.garagehub.mapper.UserMapper;
 import com.garagehub.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,7 @@ public class UserService {
     }
 
     public UserResponseDto getById(Long id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return userMapper.toResponseDto(user);
     }
 
@@ -37,7 +38,7 @@ public class UserService {
     }
 
     public UserResponseDto update(Long id, UserRequestDto dto) {
-        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
         user.setEmail(dto.getEmail());

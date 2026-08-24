@@ -5,6 +5,7 @@ import com.garagehub.dto.BookingResponseDto;
 import com.garagehub.entity.Booking;
 import com.garagehub.entity.User;
 import com.garagehub.entity.Vehicle;
+import com.garagehub.exception.ResourceNotFoundException;
 import com.garagehub.mapper.BookingMapper;
 import com.garagehub.repository.BookingRepository;
 import com.garagehub.repository.UserRepository;
@@ -35,16 +36,16 @@ public class BookingService {
 
     public BookingResponseDto getById(Long id) {
         Booking booking = bookingRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Booking Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Booking Not Found"));
         return bookingMapper.toResponseDto(booking);
     }
 
     public BookingResponseDto create(BookingRequestDto dto) {
         Vehicle vehicle = vehicleRepository.findById(dto.getVehicleId())
-                .orElseThrow(() -> new RuntimeException("Vehicle Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle Not Found"));
 
         User mechanic = userRepository.findById(dto.getMechanicId())
-                .orElseThrow(() -> new RuntimeException("Mechanic Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Mechanic Not Found"));
 
         Booking booking = bookingMapper.toEntity(dto, vehicle, mechanic);
         Booking saved = bookingRepository.save(booking);
@@ -53,13 +54,13 @@ public class BookingService {
 
     public BookingResponseDto update(Long id, BookingRequestDto dto) {
         Booking booking = bookingRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Booking Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Booking Not Found"));
 
         Vehicle vehicle = vehicleRepository.findById(dto.getVehicleId())
-                .orElseThrow(() -> new RuntimeException("Vehicle Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle Not Found"));
 
         User mechanic = userRepository.findById(dto.getMechanicId())
-                .orElseThrow(() -> new RuntimeException("Mechanic Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Mechanic Not Found"));
 
         booking.setBookingDate(dto.getBookingDate());
         booking.setDescription(dto.getDescription());
