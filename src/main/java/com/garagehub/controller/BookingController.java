@@ -3,6 +3,7 @@ package com.garagehub.controller;
 import com.garagehub.dto.BookingRequestDto;
 import com.garagehub.dto.BookingResponseDto;
 import com.garagehub.service.BookingService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,12 +30,12 @@ public class BookingController {
     }
 
     @PostMapping
-    public ResponseEntity<BookingResponseDto> save(@RequestBody BookingRequestDto dto) {
+    public ResponseEntity<BookingResponseDto> save(@Valid @RequestBody BookingRequestDto dto) {
         return ResponseEntity.status(201).body(bookingService.create(dto));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<BookingResponseDto> update(@PathVariable Long id, @RequestBody BookingRequestDto dto) {
+    public ResponseEntity<BookingResponseDto> update(@PathVariable Long id,@Valid @RequestBody BookingRequestDto dto) {
         return ResponseEntity.ok(bookingService.update(id, dto));
     }
 

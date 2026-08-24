@@ -3,6 +3,7 @@ package com.garagehub.controller;
 import com.garagehub.dto.ServiceRecordRequestDto;
 import com.garagehub.dto.ServiceRecordResponseDto;
 import com.garagehub.service.ServiceRecordService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,12 +30,12 @@ public class ServiceRecordController {
     }
 
     @PostMapping
-    public ResponseEntity<ServiceRecordResponseDto> save(@RequestBody ServiceRecordRequestDto dto) {
+    public ResponseEntity<ServiceRecordResponseDto> save(@Valid @RequestBody ServiceRecordRequestDto dto) {
         return ResponseEntity.status(201).body(serviceRecordService.create(dto));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ServiceRecordResponseDto> update(@PathVariable Long id, @RequestBody ServiceRecordRequestDto dto) {
+    public ResponseEntity<ServiceRecordResponseDto> update(@PathVariable Long id,@Valid @RequestBody ServiceRecordRequestDto dto) {
         return ResponseEntity.ok(serviceRecordService.update(id, dto));
     }
 

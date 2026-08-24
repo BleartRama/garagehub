@@ -1,8 +1,15 @@
 package com.garagehub.dto;
 
+import jakarta.validation.constraints.*;
+
+
 public class UserRequestDto {
+    @NotBlank(message = "Förnamn får inte vara tomt")
     private String firstName;
+    @NotBlank(message = "Efternamn får inte vara tomt")
     private String lastName;
+    @NotBlank(message = "E-post får inte vara tomt")
+    @Email(message = "E-postadressen är ogiltig")
     private String email;
 
     public UserRequestDto() {}

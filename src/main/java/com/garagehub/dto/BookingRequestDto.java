@@ -1,16 +1,21 @@
 package com.garagehub.dto;
 
 import com.garagehub.enums.BookingStatus;
+import jakarta.validation.constraints.*;
+
 
 import java.time.LocalDate;
 
 public class BookingRequestDto {
-
+    @NotNull(message = "Bokningsdatum måste anges")
     private LocalDate bookingDate;
+    @NotBlank(message = "Beskrivning får inte vara tom")
     private String description;
-
+    @NotNull(message = "Status måste anges")
     private BookingStatus status;
+    @NotNull(message = "Fordon måste anges")
     private Long vehicleId;
+    @NotNull(message = "Mekaniker måste anges")
     private Long mechanicId;
 
 

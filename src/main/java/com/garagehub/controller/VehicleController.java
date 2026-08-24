@@ -3,6 +3,7 @@ package com.garagehub.controller;
 import com.garagehub.dto.VehicleRequestDto;
 import com.garagehub.dto.VehicleResponseDto;
 import com.garagehub.service.VehicleService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,12 +31,12 @@ public class VehicleController {
     }
 
     @PostMapping
-    public ResponseEntity<VehicleResponseDto> save(@RequestBody VehicleRequestDto dto) {
+    public ResponseEntity<VehicleResponseDto> save(@Valid @RequestBody VehicleRequestDto dto) {
         return ResponseEntity.status(201).body(vehicleService.create(dto));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<VehicleResponseDto> update(@PathVariable Long id, @RequestBody VehicleRequestDto dto) {
+    public ResponseEntity<VehicleResponseDto> update(@PathVariable Long id, @Valid @RequestBody VehicleRequestDto dto) {
         return ResponseEntity.ok(vehicleService.update(id, dto));
     }
 

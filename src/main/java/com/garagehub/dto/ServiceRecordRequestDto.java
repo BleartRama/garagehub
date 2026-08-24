@@ -1,13 +1,21 @@
 package com.garagehub.dto;
 
+import jakarta.validation.constraints.*;
+
 import java.time.LocalDate;
 
 public class ServiceRecordRequestDto {
+    @NotNull(message = "Servicedatum måste anges")
     private LocalDate serviceDate;
+    @NotBlank(message = "Beskrivning får inte vara tom")
     private String description;
+    @PositiveOrZero(message = "Kostnad kan inte vara negativ")
     private double cost;
+    @PositiveOrZero(message = "Miltal kan inte vara negativt")
     private int nextRecommendedServiceMileage;
+    @NotNull(message = "Fordon måste anges")
     private Long vehicleId;
+    @NotNull(message = "Mekaniker måste anges")
     private Long mechanicId;
 
     public ServiceRecordRequestDto() {}

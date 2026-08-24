@@ -1,12 +1,19 @@
 package com.garagehub.dto;
 
-public class VehicleRequestDto {
-    private String registrationNumber;
-    private String brand;
-    private String model;
-    private int year;
-    private int mileage;
+import jakarta.validation.constraints.*;
 
+public class VehicleRequestDto {
+    @NotBlank(message = "Registreringsnummer får inte vara tomt")
+    private String registrationNumber;
+    @NotBlank(message = "Märke får inte vara tomt")
+    private String brand;
+    @NotBlank(message = "Modell får inte vara tomt")
+    private String model;
+    @Positive(message = "Årsmodell måste vara ett positivt tal")
+    private int year;
+    @PositiveOrZero(message = "Miltal kan inte vara negativt")
+    private int mileage;
+    @NotNull(message = "Ägare måste anges")
     private Long ownerId;
 
     public VehicleRequestDto() {}
