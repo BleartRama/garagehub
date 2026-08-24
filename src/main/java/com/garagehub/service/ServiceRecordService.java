@@ -30,6 +30,11 @@ public class ServiceRecordService {
         this.serviceRecordMapper = serviceRecordMapper;
     }
 
+    public List<ServiceRecordResponseDto> getByVehicleId(Long vehicleId) {
+        vehicleRepository.findById(vehicleId).orElseThrow(() -> new ResourceNotFoundException("Vehicle not found"));
+        return serviceRecordRepository.findByVehicleId(vehicleId).stream().map(serviceRecordMapper::toResponseDto).toList();
+    }
+
     public List<ServiceRecordResponseDto> getAll() {
         return serviceRecordRepository.findAll().stream().map(serviceRecordMapper::toResponseDto).toList();
     }
@@ -77,4 +82,6 @@ public class ServiceRecordService {
     public void delete(Long id) {
         serviceRecordRepository.deleteById(id);
     }
+
+
 }
