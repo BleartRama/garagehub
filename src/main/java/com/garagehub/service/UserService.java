@@ -27,7 +27,7 @@ public class UserService {
     }
 
     public UserResponseDto getById(Long id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Användare hittades inte"));
         return userMapper.toResponseDto(user);
     }
 
@@ -38,7 +38,7 @@ public class UserService {
     }
 
     public UserResponseDto update(Long id, UserRequestDto dto) {
-        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Användare hittades inte"));
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
         user.setEmail(dto.getEmail());

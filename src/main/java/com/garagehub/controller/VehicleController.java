@@ -1,6 +1,7 @@
 package com.garagehub.controller;
 
 import com.garagehub.dto.ServiceRecordResponseDto;
+import com.garagehub.dto.ServiceReminderResponseDto;
 import com.garagehub.dto.VehicleRequestDto;
 import com.garagehub.dto.VehicleResponseDto;
 import com.garagehub.service.ServiceRecordService;
@@ -30,6 +31,11 @@ public class VehicleController {
     @GetMapping("/{id}/service-records")
     public ResponseEntity<List<ServiceRecordResponseDto>> getByVehicleId(@PathVariable Long id) {
         return ResponseEntity.ok(serviceRecordService.getByVehicleId(id));
+    }
+
+    @GetMapping("/{id}/service-reminder")
+    public ResponseEntity<ServiceReminderResponseDto> getServiceReminder(@PathVariable Long id) {
+        return ResponseEntity.ok(serviceRecordService.getServiceReminder(id));
     }
 
     @GetMapping

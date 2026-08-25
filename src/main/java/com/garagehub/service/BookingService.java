@@ -36,16 +36,16 @@ public class BookingService {
 
     public BookingResponseDto getById(Long id) {
         Booking booking = bookingRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Booking Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Bokning hittades inte"));
         return bookingMapper.toResponseDto(booking);
     }
 
     public BookingResponseDto create(BookingRequestDto dto) {
         Vehicle vehicle = vehicleRepository.findById(dto.getVehicleId())
-                .orElseThrow(() -> new ResourceNotFoundException("Vehicle Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Fordon hittades inte"));
 
         User mechanic = userRepository.findById(dto.getMechanicId())
-                .orElseThrow(() -> new ResourceNotFoundException("Mechanic Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Mekaniker hittades inte"));
 
         Booking booking = bookingMapper.toEntity(dto, vehicle, mechanic);
         Booking saved = bookingRepository.save(booking);
@@ -54,13 +54,13 @@ public class BookingService {
 
     public BookingResponseDto update(Long id, BookingRequestDto dto) {
         Booking booking = bookingRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Booking Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Bokning hittades inte"));
 
         Vehicle vehicle = vehicleRepository.findById(dto.getVehicleId())
-                .orElseThrow(() -> new ResourceNotFoundException("Vehicle Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Fordon hittades inte"));
 
         User mechanic = userRepository.findById(dto.getMechanicId())
-                .orElseThrow(() -> new ResourceNotFoundException("Mechanic Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Mekaniker hittades inte"));
 
         booking.setBookingDate(dto.getBookingDate());
         booking.setDescription(dto.getDescription());

@@ -30,12 +30,12 @@ public class VehicleService {
     }
 
     public VehicleResponseDto getById(Long id) {
-        Vehicle vehicle = vehicleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Vehicle Not Found"));
+        Vehicle vehicle = vehicleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Fordon hittades inte"));
         return vehicleMapper.toResponseDto(vehicle);
     }
 
     public VehicleResponseDto create(VehicleRequestDto dto) {
-         User owner = userRepository.findById(dto.getOwnerId()).orElseThrow(() -> new ResourceNotFoundException("Owner Not Found"));
+         User owner = userRepository.findById(dto.getOwnerId()).orElseThrow(() -> new ResourceNotFoundException("Ägare hittades inte"));
 
          Vehicle vehicle = vehicleMapper.toEntity(dto, owner);
          Vehicle saved = vehicleRepository.save(vehicle);
@@ -43,9 +43,9 @@ public class VehicleService {
     }
 
     public VehicleResponseDto update(Long id, VehicleRequestDto dto) {
-        Vehicle vehicle = vehicleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Vehicle Not Found"));
+        Vehicle vehicle = vehicleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Fordon hittades inte"));
 
-        User owner = userRepository.findById(dto.getOwnerId()).orElseThrow(() -> new ResourceNotFoundException("Owner Not Found"));
+        User owner = userRepository.findById(dto.getOwnerId()).orElseThrow(() -> new ResourceNotFoundException("Ägare hittades inte"));
 
         vehicle.setRegistrationNumber(dto.getRegistrationNumber());
         vehicle.setBrand(dto.getBrand());

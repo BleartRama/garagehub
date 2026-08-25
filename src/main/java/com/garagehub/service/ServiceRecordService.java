@@ -2,6 +2,9 @@ package com.garagehub.service;
 
 import com.garagehub.dto.ServiceRecordRequestDto;
 import com.garagehub.dto.ServiceRecordResponseDto;
+import com.garagehub.dto.ServiceReminderResponseDto;
+import java.util.Optional;
+import java.time.LocalDate;
 import com.garagehub.entity.ServiceRecord;
 import com.garagehub.entity.User;
 import com.garagehub.entity.Vehicle;
@@ -30,8 +33,46 @@ public class ServiceRecordService {
         this.serviceRecordMapper = serviceRecordMapper;
     }
 
+    public ServiceReminderResponseDto getServiceReminder(Long vehicleId) {
+        Vehicle vehicle = vehicleRepository.findById(vehicleId).orElseThrow(() -> new ResourceNotFoundException("Fordon hittades inte"));
+        Optional<ServiceRecord> latest = serviceRecordRepository.findTopByVehicleIdOrderByServiceDateDesc(vehicleId);
+        if (latest.isEmpty()) {
+            return new ServiceReminderResponseDto(
+                    vehicle.getRegistrationNumber(),
+                    vehicle.getMileage(),
+                    null,
+                    null,
+                    false,
+                    "Ingen service registrerad än, registrera senaste service"
+            );
+        }
+        ServiceRecord serviceRecord = latest.get();
+        boolean olderThan12Months = serviceRecord.getServiceDate().isBefore(LocalDate.now().minusMonths(12));
+        boolean kmReached = vehicle.getMileage() >= serviceRecord.getNextRecommendedServiceMileage();
+        boolean dueForService = kmReached || olderThan12Months;
+        String status;
+        if (kmReached && olderThan12Months) {
+            status = "Dags för service! (Mätarställning passerad och över 12 månader sedan senaste service)";
+        } else if (kmReached) {
+            status = "Dags för service! (Mätarställning passerad)";
+        } else if (olderThan12Months) {
+            status = "Dags för service! (Över 12 månader sedan senaste service)";
+        } else {
+            status = "Inte dags för service än";
+        }
+        return new ServiceReminderResponseDto(
+                vehicle.getRegistrationNumber(),
+                vehicle.getMileage(),
+                serviceRecord.getNextRecommendedServiceMileage(),
+                serviceRecord.getServiceDate(),
+                dueForService,
+                status
+        );
+    }
+
+
     public List<ServiceRecordResponseDto> getByVehicleId(Long vehicleId) {
-        vehicleRepository.findById(vehicleId).orElseThrow(() -> new ResourceNotFoundException("Vehicle not found"));
+        vehicleRepository.findById(vehicleId).orElseThrow(() -> new ResourceNotFoundException("Fordon hittades inte"));
         return serviceRecordRepository.findByVehicleId(vehicleId).stream().map(serviceRecordMapper::toResponseDto).toList();
     }
 
@@ -39,18 +80,19 @@ public class ServiceRecordService {
         return serviceRecordRepository.findAll().stream().map(serviceRecordMapper::toResponseDto).toList();
     }
 
+
     public ServiceRecordResponseDto getById(Long id) {
         ServiceRecord serviceRecord = serviceRecordRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ServiceRecord Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("ServiceRecord hittades inte"));
         return serviceRecordMapper.toResponseDto(serviceRecord);
     }
 
     public ServiceRecordResponseDto create(ServiceRecordRequestDto dto) {
         Vehicle vehicle = vehicleRepository.findById(dto.getVehicleId())
-                .orElseThrow(() -> new ResourceNotFoundException("Vehicle Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Fordon hittades inte"));
 
         User mechanic = userRepository.findById(dto.getMechanicId())
-                .orElseThrow(() -> new ResourceNotFoundException("Mechanic Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Mekaniker hittades inte"));
 
         ServiceRecord serviceRecord = serviceRecordMapper.toEntity(dto, vehicle, mechanic);
         ServiceRecord saved = serviceRecordRepository.save(serviceRecord);
@@ -59,13 +101,13 @@ public class ServiceRecordService {
 
     public ServiceRecordResponseDto update(Long id, ServiceRecordRequestDto dto) {
         ServiceRecord serviceRecord = serviceRecordRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ServiceRecord Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("ServiceRecord hittades inte"));
 
         Vehicle vehicle = vehicleRepository.findById(dto.getVehicleId())
-                .orElseThrow(() -> new ResourceNotFoundException("Vehicle Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Fordon hittades inte"));
 
         User mechanic = userRepository.findById(dto.getMechanicId())
-                .orElseThrow(() -> new ResourceNotFoundException("Mechanic Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Mekaniker hittades inte"));
 
         serviceRecord.setCost(dto.getCost());
         serviceRecord.setNextRecommendedServiceMileage(dto.getNextRecommendedServiceMileage());
