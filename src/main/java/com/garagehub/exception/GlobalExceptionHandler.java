@@ -37,4 +37,14 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity.status(400).body(body);
     }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleEmailExists(EmailAlreadyExistsException ex) {
+        ErrorResponse body = new ErrorResponse(
+                409,
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(409).body(body);
+    }
 }
