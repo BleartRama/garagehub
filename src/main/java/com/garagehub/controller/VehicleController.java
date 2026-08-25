@@ -8,6 +8,7 @@ import com.garagehub.service.ServiceRecordService;
 import com.garagehub.service.VehicleService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -58,6 +59,7 @@ public class VehicleController {
         return ResponseEntity.ok(vehicleService.update(id, dto));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         vehicleService.delete(id);

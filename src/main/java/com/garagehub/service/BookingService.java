@@ -5,6 +5,8 @@ import com.garagehub.dto.BookingResponseDto;
 import com.garagehub.entity.Booking;
 import com.garagehub.entity.User;
 import com.garagehub.entity.Vehicle;
+import com.garagehub.enums.Role;
+import com.garagehub.exception.NotAMechanicException;
 import com.garagehub.exception.ResourceNotFoundException;
 import com.garagehub.mapper.BookingMapper;
 import com.garagehub.repository.BookingRepository;
@@ -44,8 +46,13 @@ public class BookingService {
         Vehicle vehicle = vehicleRepository.findById(dto.getVehicleId())
                 .orElseThrow(() -> new ResourceNotFoundException("Fordon hittades inte"));
 
+
         User mechanic = userRepository.findById(dto.getMechanicId())
                 .orElseThrow(() -> new ResourceNotFoundException("Mekaniker hittades inte"));
+
+        if (mechanic.getRole() != Role.MECHANIC) {
+            throw new NotAMechanicException("Användaren är inte en mekaniker");
+        }
 
         Booking booking = bookingMapper.toEntity(dto, vehicle, mechanic);
         Booking saved = bookingRepository.save(booking);
@@ -59,8 +66,13 @@ public class BookingService {
         Vehicle vehicle = vehicleRepository.findById(dto.getVehicleId())
                 .orElseThrow(() -> new ResourceNotFoundException("Fordon hittades inte"));
 
+
         User mechanic = userRepository.findById(dto.getMechanicId())
                 .orElseThrow(() -> new ResourceNotFoundException("Mekaniker hittades inte"));
+
+        if (mechanic.getRole() != Role.MECHANIC) {
+            throw new NotAMechanicException("Användaren är inte en mekaniker");
+        }
 
         booking.setBookingDate(dto.getBookingDate());
         booking.setDescription(dto.getDescription());

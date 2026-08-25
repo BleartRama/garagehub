@@ -8,6 +8,8 @@ import java.time.LocalDate;
 import com.garagehub.entity.ServiceRecord;
 import com.garagehub.entity.User;
 import com.garagehub.entity.Vehicle;
+import com.garagehub.enums.Role;
+import com.garagehub.exception.NotAMechanicException;
 import com.garagehub.exception.ResourceNotFoundException;
 import com.garagehub.mapper.ServiceRecordMapper;
 import com.garagehub.repository.ServiceRecordRepository;
@@ -91,8 +93,13 @@ public class ServiceRecordService {
         Vehicle vehicle = vehicleRepository.findById(dto.getVehicleId())
                 .orElseThrow(() -> new ResourceNotFoundException("Fordon hittades inte"));
 
+
         User mechanic = userRepository.findById(dto.getMechanicId())
                 .orElseThrow(() -> new ResourceNotFoundException("Mekaniker hittades inte"));
+
+        if (mechanic.getRole() != Role.MECHANIC) {
+            throw new NotAMechanicException("Användaren är inte en mekaniker");
+        }
 
         ServiceRecord serviceRecord = serviceRecordMapper.toEntity(dto, vehicle, mechanic);
         ServiceRecord saved = serviceRecordRepository.save(serviceRecord);
@@ -106,8 +113,13 @@ public class ServiceRecordService {
         Vehicle vehicle = vehicleRepository.findById(dto.getVehicleId())
                 .orElseThrow(() -> new ResourceNotFoundException("Fordon hittades inte"));
 
+
         User mechanic = userRepository.findById(dto.getMechanicId())
                 .orElseThrow(() -> new ResourceNotFoundException("Mekaniker hittades inte"));
+
+        if (mechanic.getRole() != Role.MECHANIC) {
+            throw new NotAMechanicException("Användaren är inte en mekaniker");
+        }
 
         serviceRecord.setCost(dto.getCost());
         serviceRecord.setNextRecommendedServiceMileage(dto.getNextRecommendedServiceMileage());

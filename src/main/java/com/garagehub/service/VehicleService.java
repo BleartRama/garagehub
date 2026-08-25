@@ -4,8 +4,11 @@ import com.garagehub.dto.VehicleRequestDto;
 import com.garagehub.dto.VehicleResponseDto;
 import com.garagehub.entity.User;
 import com.garagehub.entity.Vehicle;
+import com.garagehub.exception.ResourceInUseException;
 import com.garagehub.exception.ResourceNotFoundException;
 import com.garagehub.mapper.VehicleMapper;
+import com.garagehub.repository.BookingRepository;
+import com.garagehub.repository.ServiceRecordRepository;
 import com.garagehub.repository.UserRepository;
 import com.garagehub.repository.VehicleRepository;
 import org.springframework.stereotype.Service;
@@ -17,11 +20,27 @@ public class VehicleService {
     private final VehicleRepository vehicleRepository;
     private final UserRepository userRepository;
     private final VehicleMapper vehicleMapper;
+    private final BookingRepository bookingRepository;
+    private final ServiceRecordRepository serviceRecordRepository;
 
-    public VehicleService(VehicleRepository vehicleRepository, UserRepository userRepository, VehicleMapper vehicleMapper) {
+    public VehicleService(VehicleRepository vehicleRepository, UserRepository userRepository, VehicleMapper vehicleMapper, BookingRepository bookingRepository, ServiceRecordRepository serviceRecordRepository) {
         this.vehicleRepository = vehicleRepository;
         this.userRepository = userRepository;
         this.vehicleMapper = vehicleMapper;
+        this.bookingRepository = bookingRepository;
+        this.serviceRecordRepository = serviceRecordRepository;
+    }
+
+    public void delete(Long id) {
+        vehicleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Fordon hittades inte"));
+
+        if (!bookingRepository.findByVehicleId(id).isEmpty()
+                || !serviceRecordRepository.findByVehicleId(id).isEmpty()) {
+            throw new ResourceInUseException("Fordonet har bokningar eller serviceposter och kan inte raderas");
+        }
+
+        vehicleRepository.deleteById(id);
     }
 
 
@@ -58,7 +77,5 @@ public class VehicleService {
         return vehicleMapper.toResponseDto(saved);
     }
 
-    public void delete(Long id) {
-        vehicleRepository.deleteById(id);
-    }
+
 }

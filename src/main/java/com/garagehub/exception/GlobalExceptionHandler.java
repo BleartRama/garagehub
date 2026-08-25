@@ -47,4 +47,24 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity.status(409).body(body);
     }
+
+    @ExceptionHandler(NotAMechanicException.class)
+    public ResponseEntity<ErrorResponse> handleNotAMechanic(NotAMechanicException ex) {
+        ErrorResponse body = new ErrorResponse(
+                400,
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(400).body(body);
+    }
+
+    @ExceptionHandler(ResourceInUseException.class)
+    public ResponseEntity<ErrorResponse> handleInUse(ResourceInUseException ex) {
+        ErrorResponse body = new ErrorResponse(
+                409,
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(409).body(body);
+    }
 }
