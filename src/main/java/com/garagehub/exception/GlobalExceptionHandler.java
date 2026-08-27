@@ -67,4 +67,14 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity.status(409).body(body);
     }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex) {
+        ErrorResponse body = new ErrorResponse(
+                403,
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(403).body(body);
+    }
 }

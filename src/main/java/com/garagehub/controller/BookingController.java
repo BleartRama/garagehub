@@ -35,15 +35,23 @@ public class BookingController {
         return ResponseEntity.status(201).body(bookingService.create(dto));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<BookingResponseDto> update(@PathVariable Long id,@Valid @RequestBody BookingRequestDto dto) {
-        return ResponseEntity.ok(bookingService.update(id, dto));
-    }
+
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         bookingService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasRole('MECHANIC') or hasRole('ADMIN')")
+    @PutMapping("/{id}/approve")
+    public ResponseEntity<BookingResponseDto> approve(@PathVariable Long id) {
+        return ResponseEntity.ok(bookingService.approve(id));
+    }
+
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<BookingResponseDto> cancel(@PathVariable Long id) {
+        return ResponseEntity.ok(bookingService.cancel(id));
     }
 }

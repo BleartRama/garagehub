@@ -12,8 +12,10 @@ public class ServiceRecordMapper {
 
     public ServiceRecordResponseDto toResponseDto(ServiceRecord record) {
         String vehicleRegistrationNumber = record.getVehicle().getRegistrationNumber();
-        String mechanicName = record.getMechanic().getFirstName() + " " + record.getMechanic().getLastName();
-
+        String mechanicName = null;
+        if (record.getMechanic() != null) {
+            mechanicName = record.getMechanic().getFirstName() + " " + record.getMechanic().getLastName();
+        }
 
         return new ServiceRecordResponseDto(
                 record.getId(),
@@ -22,12 +24,14 @@ public class ServiceRecordMapper {
                 record.getCost(),
                 record.getNextRecommendedServiceMileage(),
                 mechanicName,
-                vehicleRegistrationNumber
+                vehicleRegistrationNumber,
+                record.getMileageAtService(),
+                record.getPerformedAt()
         );
     }
 
     public ServiceRecord toEntity(ServiceRecordRequestDto dto, Vehicle vehicle, User mechanic) {
-        return new ServiceRecord(
+        ServiceRecord record = new ServiceRecord(
                 dto.getServiceDate(),
                 dto.getDescription(),
                 dto.getCost(),
@@ -35,5 +39,8 @@ public class ServiceRecordMapper {
                 vehicle,
                 mechanic
         );
+        record.setMileageAtService(dto.getMileageAtService());
+        record.setPerformedAt(dto.getPerformedAt());
+        return record;
     }
 }

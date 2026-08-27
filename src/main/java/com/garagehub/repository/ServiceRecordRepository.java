@@ -9,6 +9,6 @@ import java.util.Optional;
 public interface ServiceRecordRepository extends JpaRepository<ServiceRecord, Long> {
 
     List<ServiceRecord> findByVehicleId(Long vehicleId);
-
     Optional<ServiceRecord> findTopByVehicleIdOrderByServiceDateDesc(Long vehicleId);
+    List<ServiceRecord> findByVehicleOwnerId(Long ownerId);
 }

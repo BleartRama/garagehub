@@ -15,18 +15,24 @@ public class ServiceRecordRequestDto {
     private int nextRecommendedServiceMileage;
     @NotNull(message = "Fordon måste anges")
     private Long vehicleId;
-    @NotNull(message = "Mekaniker måste anges")
+
     private Long mechanicId;
+    @PositiveOrZero(message = "Miltal vid senaste service kan inte vara negativt")
+    private int mileageAtService;
+    @NotBlank(message = "Verkstad/ort måste anges")
+    private String performedAt;
 
     public ServiceRecordRequestDto() {}
 
-    public ServiceRecordRequestDto(LocalDate serviceDate, String description, double cost, int nextRecommendedServiceMileage, Long vehicleId, Long mechanicId) {
+    public ServiceRecordRequestDto(LocalDate serviceDate, String description, double cost, int nextRecommendedServiceMileage, Long vehicleId, Long mechanicId, int mileageAtService, String performedAt) {
         this.serviceDate = serviceDate;
         this.description = description;
         this.cost = cost;
         this.nextRecommendedServiceMileage = nextRecommendedServiceMileage;
         this.vehicleId = vehicleId;
         this.mechanicId = mechanicId;
+        this.mileageAtService = mileageAtService;
+        this.performedAt = performedAt;
     }
 
     public LocalDate getServiceDate() { return serviceDate; }
@@ -46,4 +52,10 @@ public class ServiceRecordRequestDto {
 
     public Long getMechanicId() { return mechanicId; }
     public void setMechanicId(Long mechanicId) { this.mechanicId = mechanicId; }
+
+    public int getMileageAtService() { return mileageAtService; }
+    public void setMileageAtService(int mileageAtService) { this.mileageAtService = mileageAtService; }
+
+    public String getPerformedAt() { return performedAt; }
+    public void setPerformedAt(String performedAt) { this.performedAt = performedAt; }
 }

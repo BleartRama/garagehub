@@ -11,10 +11,12 @@ public class ServiceRecordResponseDto {
     private int nextRecommendedServiceMileage;
     private String mechanicName;
     private String vehicleRegistrationNumber;
+    private int mileageAtService;
+    private String performedAt;
 
     public ServiceRecordResponseDto() {}
 
-    public ServiceRecordResponseDto(Long id, LocalDate serviceDate, String description, double cost, int nextRecommendedServiceMileage, String mechanicName, String vehicleRegistrationNumber) {
+    public ServiceRecordResponseDto(Long id, LocalDate serviceDate, String description, double cost, int nextRecommendedServiceMileage, String mechanicName, String vehicleRegistrationNumber, int mileageAtService, String performedAt) {
         this.id = id;
         this.serviceDate = serviceDate;
         this.description = description;
@@ -22,6 +24,8 @@ public class ServiceRecordResponseDto {
         this.nextRecommendedServiceMileage = nextRecommendedServiceMileage;
         this.mechanicName = mechanicName;
         this.vehicleRegistrationNumber = vehicleRegistrationNumber;
+        this.mileageAtService = mileageAtService;
+        this.performedAt = performedAt;
     }
 
     public Long getId() { return id; }
@@ -37,5 +41,9 @@ public class ServiceRecordResponseDto {
     public String getMechanicName() { return mechanicName; }
 
     public String getVehicleRegistrationNumber() { return vehicleRegistrationNumber; }
+
+    public int getMileageAtService() { return mileageAtService; }
+
+    public String getPerformedAt() { return performedAt; }
 
 }

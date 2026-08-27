@@ -3,7 +3,6 @@ package com.garagehub.mapper;
 import com.garagehub.dto.BookingRequestDto;
 import com.garagehub.dto.BookingResponseDto;
 import com.garagehub.entity.Booking;
-import com.garagehub.entity.User;
 import com.garagehub.entity.Vehicle;
 import org.springframework.stereotype.Component;
 
@@ -12,8 +11,11 @@ public class BookingMapper {
 
     public BookingResponseDto toResponseDto(Booking booking) {
         String vehicleRegistrationNumber = booking.getVehicle().getRegistrationNumber();
-        String mechanicName = booking.getMechanic().getFirstName() + " " + booking.getMechanic().getLastName();
 
+        String mechanicName = null;
+        if (booking.getMechanic() != null) {
+            mechanicName = booking.getMechanic().getFirstName() + " " + booking.getMechanic().getLastName();
+        }
 
         return new BookingResponseDto(
                 booking.getId(),
@@ -25,13 +27,13 @@ public class BookingMapper {
         );
     }
 
-    public Booking toEntity(BookingRequestDto dto, Vehicle vehicle, User mechanic) {
+    public Booking toEntity(BookingRequestDto dto, Vehicle vehicle) {
         return new Booking(
                 dto.getBookingDate(),
                 dto.getDescription(),
-                dto.getStatus(),
+                null,      // status sätts av servicen (PENDING)
                 vehicle,
-                mechanic
+                null       // ingen mekaniker vid skapande — plockas upp senare
         );
     }
 }

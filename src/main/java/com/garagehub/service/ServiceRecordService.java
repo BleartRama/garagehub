@@ -9,23 +9,28 @@ import com.garagehub.entity.ServiceRecord;
 import com.garagehub.entity.User;
 import com.garagehub.entity.Vehicle;
 import com.garagehub.enums.Role;
+import com.garagehub.exception.AccessDeniedException;
 import com.garagehub.exception.NotAMechanicException;
 import com.garagehub.exception.ResourceNotFoundException;
 import com.garagehub.mapper.ServiceRecordMapper;
 import com.garagehub.repository.ServiceRecordRepository;
 import com.garagehub.repository.UserRepository;
 import com.garagehub.repository.VehicleRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional
 public class ServiceRecordService {
 
     private final ServiceRecordRepository serviceRecordRepository;
     private final VehicleRepository vehicleRepository;
     private final UserRepository userRepository;
     private final ServiceRecordMapper serviceRecordMapper;
+
 
     public ServiceRecordService(ServiceRecordRepository serviceRecordRepository, VehicleRepository vehicleRepository,
                           UserRepository userRepository, ServiceRecordMapper serviceRecordMapper) {
@@ -35,6 +40,7 @@ public class ServiceRecordService {
         this.serviceRecordMapper = serviceRecordMapper;
     }
 
+    @Transactional(readOnly = true)
     public ServiceReminderResponseDto getServiceReminder(Long vehicleId) {
         Vehicle vehicle = vehicleRepository.findById(vehicleId).orElseThrow(() -> new ResourceNotFoundException("Fordon hittades inte"));
         Optional<ServiceRecord> latest = serviceRecordRepository.findTopByVehicleIdOrderByServiceDateDesc(vehicleId);
@@ -72,20 +78,36 @@ public class ServiceRecordService {
         );
     }
 
-
+    @Transactional(readOnly = true)
     public List<ServiceRecordResponseDto> getByVehicleId(Long vehicleId) {
         vehicleRepository.findById(vehicleId).orElseThrow(() -> new ResourceNotFoundException("Fordon hittades inte"));
         return serviceRecordRepository.findByVehicleId(vehicleId).stream().map(serviceRecordMapper::toResponseDto).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ServiceRecordResponseDto> getAll() {
-        return serviceRecordRepository.findAll().stream().map(serviceRecordMapper::toResponseDto).toList();
+        User current = getCurrentUser();
+
+        List<ServiceRecord> records;
+        if (isPrivileged(current)) {
+            records = serviceRecordRepository.findAll();
+        } else {
+            records = serviceRecordRepository.findByVehicleOwnerId(current.getId());
+        }
+
+        return records.stream().map(serviceRecordMapper::toResponseDto).toList();
     }
 
-
+    @Transactional(readOnly = true)
     public ServiceRecordResponseDto getById(Long id) {
         ServiceRecord serviceRecord = serviceRecordRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ServiceRecord hittades inte"));
+
+        User current = getCurrentUser();
+        if (!isPrivileged(current) && !serviceRecord.getVehicle().getOwner().getId().equals(current.getId())) {
+            throw new AccessDeniedException("Du har inte behörighet att se denna servicepost");
+        }
+
         return serviceRecordMapper.toResponseDto(serviceRecord);
     }
 
@@ -93,12 +115,18 @@ public class ServiceRecordService {
         Vehicle vehicle = vehicleRepository.findById(dto.getVehicleId())
                 .orElseThrow(() -> new ResourceNotFoundException("Fordon hittades inte"));
 
+        User current = getCurrentUser();
+        if (!isPrivileged(current) && !vehicle.getOwner().getId().equals(current.getId())) {
+            throw new AccessDeniedException("Du kan bara lägga till service för dina egna fordon");
+        }
 
-        User mechanic = userRepository.findById(dto.getMechanicId())
-                .orElseThrow(() -> new ResourceNotFoundException("Mekaniker hittades inte"));
-
-        if (mechanic.getRole() != Role.MECHANIC) {
-            throw new NotAMechanicException("Användaren är inte en mekaniker");
+        User mechanic = null;
+        if (dto.getMechanicId() != null) {
+            mechanic = userRepository.findById(dto.getMechanicId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Mekaniker hittades inte"));
+            if (mechanic.getRole() != Role.MECHANIC) {
+                throw new NotAMechanicException("Användaren är inte en mekaniker");
+            }
         }
 
         ServiceRecord serviceRecord = serviceRecordMapper.toEntity(dto, vehicle, mechanic);
@@ -106,35 +134,29 @@ public class ServiceRecordService {
         return serviceRecordMapper.toResponseDto(saved);
     }
 
-    public ServiceRecordResponseDto update(Long id, ServiceRecordRequestDto dto) {
+
+
+    public void delete(Long id) {
         ServiceRecord serviceRecord = serviceRecordRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ServiceRecord hittades inte"));
 
-        Vehicle vehicle = vehicleRepository.findById(dto.getVehicleId())
-                .orElseThrow(() -> new ResourceNotFoundException("Fordon hittades inte"));
-
-
-        User mechanic = userRepository.findById(dto.getMechanicId())
-                .orElseThrow(() -> new ResourceNotFoundException("Mekaniker hittades inte"));
-
-        if (mechanic.getRole() != Role.MECHANIC) {
-            throw new NotAMechanicException("Användaren är inte en mekaniker");
+        User current = getCurrentUser();
+        boolean isOwner = serviceRecord.getVehicle().getOwner().getId().equals(current.getId());
+        if (current.getRole() != Role.ADMIN && !isOwner) {
+            throw new AccessDeniedException("Du kan bara ta bort dina egna serviceposter");
         }
 
-        serviceRecord.setCost(dto.getCost());
-        serviceRecord.setNextRecommendedServiceMileage(dto.getNextRecommendedServiceMileage());
-
-        serviceRecord.setServiceDate(dto.getServiceDate());
-        serviceRecord.setDescription(dto.getDescription());
-        serviceRecord.setVehicle(vehicle);
-        serviceRecord.setMechanic(mechanic);
-
-        ServiceRecord saved = serviceRecordRepository.save(serviceRecord);
-        return serviceRecordMapper.toResponseDto(saved);
+        serviceRecordRepository.deleteById(id);
     }
 
-    public void delete(Long id) {
-        serviceRecordRepository.deleteById(id);
+    private User getCurrentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Inloggad användare hittades inte"));
+    }
+
+    private boolean isPrivileged(User user) {
+        return user.getRole() == Role.ADMIN || user.getRole() == Role.MECHANIC;
     }
 
 

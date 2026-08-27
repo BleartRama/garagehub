@@ -19,14 +19,16 @@ public class ServiceRecord {
     private double cost;
     @Column(nullable = false)
     private int nextRecommendedServiceMileage;
-
+    @Column(nullable = false)
+    private int mileageAtService;
     @ManyToOne
     @JoinColumn(name = "vehicle_id")
     private Vehicle vehicle;
-
     @ManyToOne
     @JoinColumn(name = "mechanic_id")
     private User mechanic;
+    @Column(nullable = false)
+    private String performedAt;
 
     public ServiceRecord() {}
 
@@ -58,4 +60,10 @@ public class ServiceRecord {
 
     public User getMechanic() { return mechanic; }
     public void setMechanic(User mechanic) { this.mechanic = mechanic; }
+
+    public int getMileageAtService() { return mileageAtService; }
+    public void setMileageAtService(int mileageAtService) { this.mileageAtService = mileageAtService; }
+
+    public String getPerformedAt() { return performedAt; }
+    public void setPerformedAt(String performedAt) { this.performedAt = performedAt; }
 }

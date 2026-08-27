@@ -7,10 +7,13 @@ import com.garagehub.enums.Role;
 import com.garagehub.exception.EmailAlreadyExistsException;
 import com.garagehub.mapper.UserMapper;
 import com.garagehub.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+
 @Service
+@Transactional
 public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;

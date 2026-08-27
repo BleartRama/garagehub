@@ -7,10 +7,12 @@ import com.garagehub.exception.ResourceNotFoundException;
 import com.garagehub.mapper.UserMapper;
 import com.garagehub.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional
 public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
@@ -20,12 +22,14 @@ public class UserService {
         this.userMapper = userMapper;
     }
 
+    @Transactional(readOnly = true)
     public List<UserResponseDto> getAll() {
         return userRepository.findAll().stream()
                 .map(userMapper::toResponseDto)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public UserResponseDto getById(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Användare hittades inte"));
         return userMapper.toResponseDto(user);
