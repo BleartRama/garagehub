@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GarageHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- ============ LOGIN VIEW ============ -->
+    <div id="login-view" class="login-screen">
+        <div class="login-card">
+            <div class="login-brand">
+                <span class="login-plate">GH-01</span>
+                <h1>GarageHub</h1>
+                <p class="login-tagline">Verkstadssystem för fordon, bokningar och service</p>
+            </div>
+
+            <div class="tab-row">
+                <button class="tab-btn active" data-tab="login" onclick="switchTab('login')">Logga in</button>
+                <button class="tab-btn" data-tab="register" onclick="switchTab('register')">Registrera</button>
+            </div>
+
+            <!-- Login form -->
+            <form id="login-form" class="auth-form" onsubmit="handleLogin(event)">
+                <label>E-post
+                    <input type="email" id="login-email" required autocomplete="email" placeholder="namn@exempel.se">
+                </label>
+                <label>Lösenord
+                    <input type="password" id="login-password" required autocomplete="current-password" placeholder="••••••••">
+                </label>
+                <button type="submit" class="btn-primary">Logga in</button>
+                <p class="form-error" id="login-error"></p>
+            </form>
+
+            <!-- Register form -->
+            <form id="register-form" class="auth-form hidden" onsubmit="handleRegister(event)">
+                <div class="field-pair">
+                    <label>Förnamn
+                        <input type="text" id="reg-firstname" required placeholder="Anna">
+                    </label>
+                    <label>Efternamn
+                        <input type="text" id="reg-lastname" required placeholder="Svensson">
+                    </label>
+                </div>
+                <label>E-post
+                    <input type="email" id="reg-email" required autocomplete="email" placeholder="namn@exempel.se">
+                </label>
+                <label>Lösenord
+                    <input type="password" id="reg-password" required minlength="8" autocomplete="new-password" placeholder="Minst 8 tecken">
+                </label>
+                <button type="submit" class="btn-primary">Skapa konto</button>
+                <p class="form-error" id="register-error"></p>
+                <p class="form-success" id="register-success"></p>
+            </form>
+        </div>
+        <footer class="login-footer">GarageHub · Fullstack-projekt</footer>
+    </div>
+
+    <!-- ============ APP SHELL ============ -->
+    <div id="app-view" class="app-shell hidden">
+        <header class="topbar">
+            <div class="topbar-brand">
+                <span class="brand-plate">GH</span>
+                <span class="brand-name">GarageHub</span>
+            </div>
+            <nav class="topnav">
+                <button class="nav-btn active" data-view="dashboard" onclick="showView('dashboard')">Översikt</button>
+                <button class="nav-btn" data-view="vehicles" onclick="showView('vehicles')">Fordon</button>
+                <button class="nav-btn" data-view="bookings" onclick="showView('bookings')">Bokningar</button>
+                <button class="nav-btn" data-view="records" onclick="showView('records')">Service</button>
+            </nav>
+            <div class="topbar-user">
+                <span id="user-badge" class="user-badge"></span>
+                <button class="btn-ghost" onclick="logout()">Logga ut</button>
+            </div>
+        </header>
+
+        <main class="content">
+            <!-- DASHBOARD -->
+            <section id="dashboard-panel" class="panel">
+                <div class="panel-head">
+                    <h2>Översikt</h2>
+                    <p class="panel-sub">Snabb koll på verkstadens läge</p>
+                </div>
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <span class="stat-num" id="stat-vehicles">–</span>
+                        <span class="stat-label">Fordon</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-num" id="stat-bookings">–</span>
+                        <span class="stat-label">Bokningar</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-num" id="stat-records">–</span>
+                        <span class="stat-label">Serviceposter</span>
+                    </div>
+                    <div class="stat-card stat-card--alert">
+                        <span class="stat-num" id="stat-due">–</span>
+                        <span class="stat-label">Behöver service</span>
+                    </div>
+                </div>
+                <div class="due-block">
+                    <h3>Servicestatus per fordon</h3>
+                    <div id="due-list" class="due-list"></div>
+                </div>
+            </section>
+
+            <!-- VEHICLES -->
+            <section id="vehicles-panel" class="panel hidden">
+                <div class="panel-head">
+                    <h2>Fordon</h2>
+                    <button class="btn-primary btn-sm" onclick="openModal('vehicle')">+ Nytt fordon</button>
+                </div>
+                <div id="vehicles-list" class="card-list"></div>
+            </section>
+
+            <!-- BOOKINGS -->
+            <section id="bookings-panel" class="panel hidden">
+                <div class="panel-head">
+                    <h2>Bokningar</h2>
+                    <button class="btn-primary btn-sm" onclick="openModal('booking')">+ Ny bokning</button>
+                </div>
+                <div id="bookings-list" class="card-list"></div>
+            </section>
+
+            <!-- SERVICE RECORDS -->
+            <section id="records-panel" class="panel hidden">
+                <div class="panel-head">
+                    <h2>Serviceposter</h2>
+                    <button class="btn-primary btn-sm" onclick="openModal('record')">+ Ny servicepost</button>
+                </div>
+                <div id="records-list" class="card-list"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ============ MODAL ============ -->
+    <div id="modal-overlay" class="modal-overlay hidden" onclick="closeModalOnOverlay(event)">
+        <div class="modal">
+            <div class="modal-head">
+                <h3 id="modal-title">Ny</h3>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <form id="modal-form" onsubmit="handleModalSubmit(event)">
+                <div id="modal-fields"></div>
+                <p class="form-error" id="modal-error"></p>
+                <div class="modal-actions">
+                    <button type="button" class="btn-ghost" onclick="closeModal()">Avbryt</button>
+                    <button type="submit" class="btn-primary" id="modal-submit">Spara</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
