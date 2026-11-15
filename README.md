@@ -1,3 +1,5 @@
+![CI](https://github.com/BleartRama/GarageHub/actions/workflows/ci.yml/badge.svg)
+
 # GarageHub
 
 Ett backend-tungt fullstack-projekt: ett verkstadssystem för bilägare och verkstäder. Kunder
