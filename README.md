@@ -2,239 +2,305 @@
 
 # GarageHub
 
-Ett backend-tungt fullstack-projekt: ett verkstadssystem för bilägare och verkstäder. Kunder
-registrerar sina fordon, bokar servicetider, ser sin servicehistorik och får
-servicepåminnelser. Mekaniker hanterar bokningar och serviceposter, och
-administratörer har full kontroll.
+A backend-focused fullstack project: a workshop and booking system for car
+owners and repair shops. Customers register their vehicles, book service
+appointments, view their service history and get service reminders. Mechanics
+manage bookings and service records, and administrators have full control.
 
-Byggt med Java och Spring Boot med ett REST-API, JWT-baserad autentisering,
-rollstyrd åtkomst och ägarskapskontroll så att varje kund bara ser sina egna
-uppgifter.
+Built with Java and Spring Boot as a REST API with JWT authentication,
+role-based access control and ownership checks, so each customer only ever
+sees their own data. The project has unit tests, runs with Docker, and is
+built and tested automatically in GitHub Actions.
 
-- **Backend-repo:** https://github.com/BleartRama/garagehub
-- **Frontend-repo:** https://github.com/BleartRama/Garagehub-frontend
+**Run the whole thing with one command:**
+
+```bash
+docker compose up --build
+```
+
+The app is then available at `http://localhost:8080`.
 
 ---
 
-## Innehåll
+## Contents
 
-- [Teknik](#teknik)
-- [Funktioner](#funktioner)
-- [Arkitektur](#arkitektur)
-- [Kom igång](#kom-igång)
-- [API-översikt](#api-översikt)
-- [Roller och behörigheter](#roller-och-behörigheter)
-- [Säkerhet](#säkerhet)
+- [Tech stack](#tech-stack)
+- [Features](#features)
+- [Architecture](#architecture)
+- [Getting started](#getting-started)
+- [Tests](#tests)
+- [CI/CD](#cicd)
+- [API overview](#api-overview)
+- [Roles and permissions](#roles-and-permissions)
+- [Security](#security)
 - [Frontend](#frontend)
-- [Möjliga vidareutvecklingar](#möjliga-vidareutvecklingar)
+- [Possible next steps](#possible-next-steps)
 
 ---
 
-## Teknik
+## Tech stack
 
-- **Java** och **Spring Boot** (Spring Web, Spring Data JPA, Spring Security)
-- **MySQL** som databas, Hibernate som ORM
-- **JWT** (jjwt) för stateless autentisering
-- **BCrypt** för lösenordshashning
-- **Bean Validation** för validering av inkommande data
-- Byggs med **Maven**
-
----
-
-## Funktioner
-
-- Fullständig CRUD för fordon, bokningar och serviceposter
-- Registrering och inloggning med JWT
-- Rollstyrd åtkomst: `USER`, `MECHANIC`, `ADMIN`
-- Ägarskapskontroll – kunder ser och hanterar bara sina egna fordon,
-  bokningar och serviceposter
-- Bokningsflöde: en bokning skapas som `PENDING` och godkänns (`APPROVED`)
-  eller avbokas (`CANCELLED`) av en mekaniker; kunden kan avboka sin egen
-- Servicehistorik per fordon
-- Servicepåminnelse: ett beräknat värde som avgör om ett fordon behöver
-  service baserat på mätarställning eller tid sedan senaste service
-- Global felhantering med egna undantag och tydliga HTTP-statuskoder
-- Felmeddelanden på svenska
+- **Java 25** and **Spring Boot 4** (Spring Web, Spring Data JPA, Spring Security)
+- **MySQL** as the database, Hibernate as ORM
+- **JWT** (jjwt) for stateless authentication
+- **BCrypt** for password hashing
+- **Bean Validation** for validating incoming data
+- **JUnit 5** and **Mockito** for unit tests
+- **Docker** and **docker-compose** to run the app and its database
+- **GitHub Actions** for CI
+- Built with **Maven**
 
 ---
 
-## Arkitektur
+## Features
 
-Projektet följer en strikt trelagersarkitektur med tydlig ansvarsfördelning:
+- Full CRUD for vehicles, bookings and service records
+- Registration and login with JWT
+- Role-based access control: `USER`, `MECHANIC`, `ADMIN`
+- Ownership checks – customers only see and manage their own vehicles,
+  bookings and service records
+- Booking flow: a booking is created as `PENDING` and is either approved
+  (`APPROVED`) or cancelled (`CANCELLED`) by a mechanic; customers can cancel
+  their own
+- Service history per vehicle
+- Service reminder: a calculated value that decides whether a vehicle needs
+  service based on mileage or time since the last service
+- Global exception handling with custom exceptions and correct HTTP status
+  codes
+- Error messages are in Swedish, since the application targets Swedish users
+
+---
+
+## Architecture
+
+The project follows a strict three-layer architecture with clear
+responsibilities:
 
 ```
-Controller  →  Service  →  Repository  →  Databas
+Controller  →  Service  →  Repository  →  Database
 ```
 
-- **Controller** – tar emot HTTP-anrop, returnerar `ResponseEntity`, delegerar
-  allt arbete till service-lagret. Innehåller ingen affärslogik.
-- **Service** – all affärslogik, ägarskapskontroller, transaktionshantering,
-  kastar egna namngivna undantag.
-- **Repository** – databasåtkomst via Spring Data JPA med derived queries.
-- **Entity** – JPA-entiteter som speglar databastabellerna.
-- **DTO** – separata `XxxRequestDto` och `XxxResponseDto` så att entiteter
-  aldrig exponeras direkt i API:et.
-- **Mapper** – översätter mellan entitet och DTO.
+- **Controller** – receives HTTP requests, returns `ResponseEntity`, delegates
+  all work to the service layer. Contains no business logic.
+- **Service** – all business logic, ownership checks, transaction handling,
+  throws named custom exceptions.
+- **Repository** – database access through Spring Data JPA derived queries.
+- **Entity** – JPA entities mirroring the database tables.
+- **DTO** – separate `XxxRequestDto` and `XxxResponseDto` so entities are
+  never exposed directly through the API.
+- **Mapper** – translates between entity and DTO.
 
-Domänen har fyra huvudentiteter: `User`, `Vehicle`, `Booking` och
-`ServiceRecord`. En mekaniker är inte en egen entitet utan en `User` med rollen
-`MECHANIC`.
+The domain has four main entities: `User`, `Vehicle`, `Booking` and
+`ServiceRecord`. A mechanic is not a separate entity but a `User` with the
+`MECHANIC` role.
+
+The frontend is served by Spring Boot from `src/main/resources/static`, so the
+entire application runs on a single origin.
 
 ---
 
-## Kom igång
+## Getting started
 
-### Förutsättningar
+The application reads two secrets from environment variables. They are never
+present in the code or in version control:
 
-- Java (17 eller senare)
-- Maven
-- En körande MySQL-server
+| Variable      | Description                                        |
+|---------------|----------------------------------------------------|
+| `DB_PASSWORD` | Password for the MySQL user                        |
+| `JWT_SECRET`  | A long, random secret key (at least 32 characters) |
 
-### 1. Skapa databasen
+Create a `.env` file in the project root. It is gitignored and must never be
+committed:
 
-Skapa en tom databas i MySQL:
+```bash
+cp .env.example .env
+```
+
+Fill in the values. A suitable key can be generated with:
+
+```bash
+openssl rand -base64 48
+```
+
+### Option 1: Docker (recommended)
+
+Docker is the only prerequisite. Neither Java nor MySQL needs to be installed.
+
+```bash
+docker compose up --build
+```
+
+This starts two containers: the application and a MySQL database. The app runs
+on `http://localhost:8080`, and the database is exposed on port `3307` if you
+want to inspect it with a tool such as MySQL Workbench.
+
+```bash
+docker compose down      # stop everything, keep the database
+docker compose down -v   # stop everything and delete the database
+```
+
+### Option 2: Locally with Maven
+
+Requires Java 25 and a running MySQL server.
+
+Create the database:
 
 ```sql
 CREATE DATABASE garagehub;
 ```
 
-Tabellerna skapas automatiskt av Hibernate vid uppstart
+Tables are created automatically by Hibernate on startup
 (`spring.jpa.hibernate.ddl-auto=update`).
 
-### 2. Sätt miljövariabler
-
-Applikationen läser två hemligheter från miljövariabler – de finns aldrig i
-koden eller i versionshanteringen. Sätt dem i din IDE:s körkonfiguration (eller
-i din terminalmiljö):
-
-| Variabel      | Beskrivning                                            |
-|---------------|--------------------------------------------------------|
-| `DB_PASSWORD` | Lösenordet till din MySQL-användare (`root`)           |
-| `JWT_SECRET`  | En lång, slumpmässig hemlig nyckel (minst 32 tecken)   |
-
-`application.properties` refererar till dem via `${DB_PASSWORD}` och
-`${JWT_SECRET}`, så filen är säker att versionshantera.
-
-### 3. Starta applikationen
-
-Starta via din IDE, eller med Maven:
+Then run:
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-API:et körs på `http://localhost:8080`.
+---
+
+## Tests
+
+Unit tests written with JUnit 5 and Mockito. The tests are isolated and
+require neither a database nor network access, which means they run anywhere
+in a couple of seconds.
+
+```bash
+./mvnw test
+```
+
+What is covered:
+
+- `ServiceRecordMapperTest` – entity to DTO mapping, including the case where
+  a service record has no mechanic and the name should be `null`.
+- `ServiceRecordServiceTest` – the service reminder logic, with one test per
+  branch: no service recorded, mileage threshold reached, more than twelve
+  months since the last service, and the case where no service is due.
+  Repositories are replaced with Mockito mocks.
 
 ---
 
-## API-översikt
+## CI/CD
 
-Alla endpoints utom `/auth/**` kräver en giltig JWT i `Authorization`-headern:
+Every push and pull request against `main` runs a GitHub Actions pipeline
+that:
+
+1. checks out the code and installs Java 25,
+2. runs all unit tests,
+3. builds the Docker image to verify that it builds from a clean state.
+
+The configuration lives in `.github/workflows/ci.yml`. The badge at the top of
+this file shows the current status.
+
+---
+
+## API overview
+
+Every endpoint except `/auth/**` requires a valid JWT in the `Authorization`
+header:
 
 ```
 Authorization: Bearer <token>
 ```
 
-### Autentisering
+### Authentication
 
-| Metod | Endpoint         | Beskrivning                          |
-|-------|------------------|--------------------------------------|
-| POST  | `/auth/register` | Registrera ny användare (blir `USER`)|
-| POST  | `/auth/login`    | Logga in, returnerar en JWT          |
+| Method | Endpoint         | Description                            |
+|--------|------------------|----------------------------------------|
+| POST   | `/auth/register` | Register a new user (becomes `USER`)   |
+| POST   | `/auth/login`    | Log in, returns a JWT                  |
 
-### Fordon
+### Vehicles
 
-| Metod  | Endpoint                          | Beskrivning                          |
-|--------|-----------------------------------|--------------------------------------|
-| GET    | `/vehicles`                       | Lista fordon (filtrerat på ägarskap) |
-| GET    | `/vehicles/{id}`                  | Hämta ett fordon                     |
-| POST   | `/vehicles`                       | Skapa fordon (ägare sätts automatiskt)|
-| PUT    | `/vehicles/{id}`                  | Uppdatera fordon                     |
-| DELETE | `/vehicles/{id}`                  | Ta bort fordon (endast admin)        |
-| GET    | `/vehicles/{id}/service-records`  | Servicehistorik för ett fordon       |
-| GET    | `/vehicles/{id}/service-reminder` | Servicepåminnelse för ett fordon     |
+| Method | Endpoint                          | Description                            |
+|--------|-----------------------------------|----------------------------------------|
+| GET    | `/vehicles`                       | List vehicles (filtered by ownership)  |
+| GET    | `/vehicles/{id}`                  | Get a single vehicle                   |
+| POST   | `/vehicles`                       | Create a vehicle (owner set automatically) |
+| PUT    | `/vehicles/{id}`                  | Update a vehicle                       |
+| DELETE | `/vehicles/{id}`                  | Delete a vehicle (admin only)          |
+| GET    | `/vehicles/{id}/service-records`  | Service history for a vehicle          |
+| GET    | `/vehicles/{id}/service-reminder` | Service reminder for a vehicle         |
 
-### Bokningar
+### Bookings
 
-| Metod  | Endpoint                  | Beskrivning                              |
-|--------|---------------------------|------------------------------------------|
-| GET    | `/bookings`               | Lista bokningar (filtrerat på ägarskap)  |
-| GET    | `/bookings/{id}`          | Hämta en bokning                         |
-| POST   | `/bookings`               | Skapa bokning (blir `PENDING`)           |
-| PUT    | `/bookings/{id}/approve`  | Godkänn bokning (mekaniker/admin)        |
-| PUT    | `/bookings/{id}/cancel`   | Avboka bokning (ägare, mekaniker, admin) |
-| DELETE | `/bookings/{id}`          | Ta bort bokning (endast admin)           |
+| Method | Endpoint                  | Description                                 |
+|--------|---------------------------|---------------------------------------------|
+| GET    | `/bookings`               | List bookings (filtered by ownership)       |
+| GET    | `/bookings/{id}`          | Get a single booking                        |
+| POST   | `/bookings`               | Create a booking (becomes `PENDING`)        |
+| PUT    | `/bookings/{id}/approve`  | Approve a booking (mechanic/admin)          |
+| PUT    | `/bookings/{id}/cancel`   | Cancel a booking (owner, mechanic, admin)   |
+| DELETE | `/bookings/{id}`          | Delete a booking (admin only)               |
 
-### Serviceposter
+### Service records
 
-| Metod  | Endpoint                | Beskrivning                                  |
-|--------|-------------------------|----------------------------------------------|
-| GET    | `/service-records`      | Lista serviceposter (filtrerat på ägarskap)  |
-| GET    | `/service-records/{id}` | Hämta en servicepost                         |
-| POST   | `/service-records`      | Skapa servicepost (för egen bil)             |
-| DELETE | `/service-records/{id}` | Ta bort servicepost (ägare eller admin)      |
+| Method | Endpoint                | Description                                      |
+|--------|-------------------------|--------------------------------------------------|
+| GET    | `/service-records`      | List service records (filtered by ownership)     |
+| GET    | `/service-records/{id}` | Get a single service record                      |
+| POST   | `/service-records`      | Create a service record (for your own vehicle)   |
+| DELETE | `/service-records/{id}` | Delete a service record (owner or admin)         |
 
 ---
 
-## Roller och behörigheter
+## Roles and permissions
 
-| Roll       | Behörighet                                                           |
+| Role       | Permissions                                                          |
 |------------|----------------------------------------------------------------------|
-| `USER`     | Ser och hanterar bara sina egna fordon, bokningar och serviceposter. Kan boka tid och avboka sina egna bokningar. Kan lägga in egna serviceposter för sina bilar. |
-| `MECHANIC` | Ser alla fordon, bokningar och serviceposter. Kan godkänna och avboka bokningar. |
-| `ADMIN`    | Full åtkomst till allt, inklusive borttagning.                       |
+| `USER`     | Sees and manages only their own vehicles, bookings and service records. Can book appointments and cancel their own bookings. Can add service records for their own vehicles. |
+| `MECHANIC` | Sees all vehicles, bookings and service records. Can approve and cancel bookings. |
+| `ADMIN`    | Full access to everything, including deletion.                       |
 
-Åtkomst styrs på två sätt:
+Access is enforced in two ways:
 
-- **Rollbaserat** med `@PreAuthorize` där en ren rollkontroll räcker
-  (t.ex. att bara mekaniker/admin får godkänna bokningar).
-- **Ägarskapsbaserat** i service-lagret, där den inloggade användaren jämförs
-  mot resursens ägare – detta kräver ett databasuppslag och är därför
-  affärslogik snarare än en enkel annotation.
+- **Role-based** with `@PreAuthorize` where a plain role check is enough
+  (for example, only mechanics and admins may approve bookings).
+- **Ownership-based** in the service layer, where the authenticated user is
+  compared against the resource owner. This requires a database lookup and is
+  therefore business logic rather than a simple annotation.
 
 ---
 
-## Säkerhet
+## Security
 
-- **Lösenord** hashas med BCrypt innan de sparas – aldrig i klartext.
-- **JWT** används för stateless autentisering. Token signeras med en hemlig
-  nyckel och verifieras vid varje anrop, så servern behöver ingen session.
-  Token bär användarens e-post och roll.
-- **Hemligheter** (databaslösenord och JWT-nyckel) ligger i miljövariabler,
-  aldrig i koden eller i git.
-- **CORS** är konfigurerat så att frontenden (`http://localhost:5173`) får
-  anropa API:et.
-- Statuskoder: `401` (ej inloggad), `403` (inloggad men saknar behörighet),
-  `409` (konflikt, t.ex. resurs som används).
+- **Passwords** are hashed with BCrypt before being stored, never in plain
+  text.
+- **JWT** is used for stateless authentication. The token is signed with a
+  secret key and verified on every request, so the server keeps no session.
+  The token carries the user's email and role.
+- **Secrets** (database password and JWT key) are read from environment
+  variables or a `.env` file that is never version controlled. `.env` is also
+  listed in `.dockerignore`, so secrets never end up inside the Docker image.
+- **Static files** (the frontend) are public; everything else except
+  `/auth/**` requires a valid token.
+- Status codes: `401` (not authenticated), `403` (authenticated but not
+  authorized), `409` (conflict, for example a resource still in use).
 
 ---
 
 ## Frontend
 
-Projektet har en separat frontend byggd med HTML, CSS och vanilla JavaScript
-som konsumerar API:et. Den hanterar inloggning, sparar JWT i webbläsaren och
-visar olika vyer för fordon, bokningar och serviceposter.
+The frontend is built with HTML, CSS and vanilla JavaScript and consumes the
+API. It handles login, stores the JWT in the browser and renders separate
+views for vehicles, bookings and service records.
 
-- **Frontend-repo:** https://github.com/BleartRama/Garagehub-frontend
-
-Frontenden måste köras på `http://localhost:5173` (det är den origin som
-CORS tillåter). Starta en enkel statisk server i frontend-mappen:
-
-```bash
-python3 -m http.server 5173
-```
-
-Öppna sedan `http://localhost:5173` i webbläsaren med backenden igång.
+It lives in `src/main/resources/static` and is served by Spring Boot, so it
+starts together with the backend at `http://localhost:8080`. No separate
+server and no CORS configuration is needed.
 
 ---
 
-## Möjliga vidareutvecklingar
+## Possible next steps
 
-Följande valdes medvetet bort för att hålla projektet inom rimlig omfattning,
-men skulle vara naturliga nästa steg:
+The following were deliberately left out to keep the project at a reasonable
+scope, but would be natural next steps:
 
-- Serviceintervall per komponent (olja, kamrem, bromsvätska osv.) med egna
-  km- och tidsintervall
-- Per-fordon konfigurerbara serviceplaner
-- Dropdown-val av fordon i frontend-formulären i stället för att ange id
-- Redigering (PUT) av bokningar och serviceposter
+- Cloud deployment with a public demo URL
+- Integration tests against a real database using Testcontainers
+- Per-component service intervals (oil, timing belt, brake fluid and so on)
+  with their own mileage and time intervals
+- Configurable service plans per vehicle
+- Vehicle dropdowns in the frontend forms instead of entering ids manually
+- Editing (PUT) of bookings and service records
