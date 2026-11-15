@@ -13,7 +13,7 @@ public class ServiceRecordMapperTest {
     private final ServiceRecordMapper mapper = new ServiceRecordMapper();
 
     @Test
-    void toResponseDto_nar_MekanikerFinns_satterFullstandigtNamn() {
+    void toResponseDto_whenMechanicExists_setsFullName() {
         User mekaniker = new User("Anna", "Svensson", "anna@test.se");
         Vehicle fordon = new Vehicle("ABC123", "Volvo", "V70", 2015, 12000, null);
         ServiceRecord record = new ServiceRecord(
@@ -27,7 +27,7 @@ public class ServiceRecordMapperTest {
     }
 
     @Test
-    void toResponseDto_narMekanikerSaknas_satterNamnetTillNull() {
+    void toResponseDto_whenMechanicIsNull_setsNameToNull() {
         Vehicle fordon = new Vehicle("ABC123", "Volvo", "V70", 2015, 12000, null);
         ServiceRecord record = new ServiceRecord(
                 LocalDate.now(), "Oljebyte", 1200.0, 15000, fordon, null);
